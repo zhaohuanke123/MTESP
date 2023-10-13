@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../Study/ESP"
+		},
+		{
+			"name": "MTESP",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.tcc": "cpp",
+			"algorithm": "cpp",
+			"istream": "cpp",
+			"ostream": "cpp"
+		}
+	}
+}
