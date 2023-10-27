@@ -32,7 +32,6 @@ void loop() {
       delay(100);
       digitalWrite(ledPin, LOW);
       delay(100);
-      // 插值函数 从i从0到5对应 25到76.8
       ledcWrite(ledChannel, dutyCycle0 + (dutyCycle90 - dutyCycle0) / 5 * i);
     }
 
@@ -45,7 +44,6 @@ void loop() {
       delay(100);
       digitalWrite(ledPin, LOW);
       delay(100);
-      // 插值函数 从i从0到5对应 76.8到25
       ledcWrite(ledChannel, dutyCycle90 - (dutyCycle90 - dutyCycle0) / 5 * i);
     }
 

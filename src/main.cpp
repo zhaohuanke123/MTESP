@@ -75,7 +75,7 @@ bool udpSendMessage(IPAddress ipAddr, String udpMsg, int udpPort) {
 
 
 // 发送端
-// #define __server__
+#define __server__
 #ifdef __server__
 
 WiFiUDP udp;

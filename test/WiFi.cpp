@@ -1,12 +1,12 @@
-// æœ¬å®éªŒéœ€è¦ä¸¤å—ESP32æ¿åˆä½œå®Œæˆï¼ï¼
-// ï¼ˆ1ï¼‰ä¸€å—ESP32è¿æ¥è¶…å£°æ³¢æ¨¡å—ï¼Œè¯»å–æµ‹è·æ•°æ®ï¼Œæ¿ä¸Šè¿æ¥IO12å£æ¥LEDå°ç¯æ ¹æ®è·ç¦»çš„
-// è¿œè¿‘ä»¥ä¸åŒçš„å‘¨æœŸé—ªåŠ¨ã€‚
-// é—ªåŠ¨å‘¨æœŸï¼ˆæ¯«ç§’ï¼‰= 990*æµ‹è·æ•°æ®ï¼ˆå˜ç±³ï¼‰ *æµ‹è·æ•°æ®ï¼ˆå˜ç±³ï¼‰ /(35*35)+10ï¼ˆå½“æµ‹è·æ•°æ®
-// å°äº35æ—¶ï¼‰
-// å½“æµ‹è·æ•°æ®å¤§äº35æ—¶ï¼Œå°ç¯ç­ï¼Œä¸é—ªåŠ¨ã€‚
-// åŒæ—¶ï¼Œé€šè¿‡WIFI UDPé€šè®¯å‘é€ç»™å¦ä¸€å—ESP32ã€‚
-// ï¼ˆ2ï¼‰å¦ä¸€å—ESP32å°†å¾—åˆ°çš„æµ‹è·æ•°æ®æ˜¾ç¤ºåœ¨ä¸²å£ç›‘è§†å™¨ä¸­ï¼ŒåŒæ—¶æ§åˆ¶æ¿è½½å°ç¯ï¼ˆIO02ï¼‰æ ¹
-// æ®æ¥æ”¶åˆ°çš„è·ç¦»çš„è¿œè¿‘ä»¥ä¸åŒçš„å‘¨æœŸé—ªåŠ¨ï¼Œå‘¨æœŸä¸ç¬¬ä¸€å—ESP32ä¸Šçš„å°ç¯ç›¸åŒã€‚
+// ±¾ÊµÑéĞèÒªÁ½¿éESP32°åºÏ×÷Íê³É£¡£¡
+// £¨1£©Ò»¿éESP32Á¬½Ó³¬Éù²¨Ä£¿é£¬¶ÁÈ¡²â¾àÊı¾İ£¬°åÉÏÁ¬½ÓIO12¿Ú½ÓLEDĞ¡µÆ¸ù¾İ¾àÀëµÄ
+// Ô¶½üÒÔ²»Í¬µÄÖÜÆÚÉÁ¶¯¡£
+// ÉÁ¶¯ÖÜÆÚ£¨ºÁÃë£©= 990*²â¾àÊı¾İ£¨ÀåÃ×£© *²â¾àÊı¾İ£¨ÀåÃ×£© /(35*35)+10£¨µ±²â¾àÊı¾İ
+// Ğ¡ÓÚ35Ê±£©
+// µ±²â¾àÊı¾İ´óÓÚ35Ê±£¬Ğ¡µÆÃğ£¬²»ÉÁ¶¯¡£
+// Í¬Ê±£¬Í¨¹ıWIFI UDPÍ¨Ñ¶·¢ËÍ¸øÁíÒ»¿éESP32¡£
+// £¨2£©ÁíÒ»¿éESP32½«µÃµ½µÄ²â¾àÊı¾İÏÔÊ¾ÔÚ´®¿Ú¼àÊÓÆ÷ÖĞ£¬Í¬Ê±¿ØÖÆ°åÔØĞ¡µÆ£¨IO02£©¸ù
+// ¾İ½ÓÊÕµ½µÄ¾àÀëµÄÔ¶½üÒÔ²»Í¬µÄÖÜÆÚÉÁ¶¯£¬ÖÜÆÚÓëµÚÒ»¿éESP32ÉÏµÄĞ¡µÆÏàÍ¬¡£
 
 #include <Arduino.h>
 #include <Ticker.h>
@@ -40,42 +40,9 @@ void led() {
     }
 }
 
-bool udpSendMessage(IPAddress ipAddr, String udpMsg, int udpPort) {
-  /** WiFiUDP class for creating UDP communication */
-  WiFiUDP udpClientServer;
 
-  // Start UDP client for sending packets
-  int connOK = udpClientServer.begin(udpPort);
-
-  if (connOK == 0) {
-    Serial.println("UDP could not get socket");
-    return false;
-  }
-  int beginOK = udpClientServer.beginPacket(ipAddr, udpPort);
-
-  if (beginOK == 0) { // Problem occured!
-    udpClientServer.stop();
-    Serial.println("UDP connection failed");
-    return false;
-  }
-  int bytesSent = udpClientServer.print(udpMsg);
-  if (bytesSent == udpMsg.length()) {
-    Serial.println("Sent " + String(bytesSent) + " bytes from " + udpMsg + " which had a length of " + String(udpMsg.length()) + " bytes");
-    udpClientServer.endPacket();
-    udpClientServer.stop();
-    return true;
-  }
-  else {
-    Serial.println("Failed to send " + udpMsg + ", sent " + String(bytesSent) + " of " + String(udpMsg.length()) + " bytes");
-    udpClientServer.endPacket();
-    udpClientServer.stop();
-    return false;
-  }
-}
-
-
-// å‘é€ç«¯
-// #define __server__
+// ·¢ËÍ¶Ë
+#define __server__
 #ifdef __server__
 
 WiFiUDP udp;
@@ -147,7 +114,7 @@ void loop()
 }
 #endif
 
-// æ¥æ”¶ç«¯
+// ½ÓÊÕ¶Ë
 #ifndef __server__
 WiFiUDP udp;
 
