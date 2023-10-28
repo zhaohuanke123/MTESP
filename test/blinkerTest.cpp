@@ -1,40 +1,57 @@
 #define BLINKER_WIFI
 #include <Blinker.h>
-char auth[] = "1ae364051dc8"; // Éè±¸ÃÜÔ¿
-char ssid[] = "0d00"; // WIFIÈÈµã
-char pswd[] = "0d000721"; // WIFIÃÜÂë
-#define LED_PIN 2 // LEDÒı½Å
-// ĞÂ½¨×é¼ş¶ÔÏó
-BlinkerButton Button1("btn-abc");
-BlinkerNumber Number1("num-abc");
+char auth[] = "1ae364051dc8"; // è®¾å¤‡å¯†é’¥
+char ssid[] = "0d00"; // WIFIçƒ­ç‚¹
+char pswd[] = "0d000721"; // WIFIå¯†ç 
+
+const int ledPin = 2;
+const int ledChannel = 0;
+
+// æ–°å»ºç»„ä»¶å¯¹è±¡
+// BlinkerButton Button1("btn-abc");
+// BlinkerNumber Number1("num-abc");
+BlinkerSlider Slider1("ran-ufx");
+
 int counter = 0;
-// °´ÏÂ°´¼ü¼´»áÖ´ĞĞ¸Ãº¯Êı
+// æŒ‰ä¸‹æŒ‰é”®å³ä¼šæ‰§è¡Œè¯¥å‡½æ•°
 void button1_callback(const String& state)
 {
   BLINKER_LOG("get button state: ", state);
-  digitalWrite(LED_PIN, !digitalRead(LED_PIN)); // ·­×ªLEDµÆ×´Ì¬
+  digitalWrite(ledPin, !digitalRead(ledPin)); // ç¿»è½¬LEDç¯çŠ¶æ€
+  // ledcWrite(ledChannel, 255);
 }
-// Èç¹ûÎ´°ó¶¨µÄ×é¼ş±»´¥·¢£¬Ôò»áÖ´ĞĞÆäÖĞÄÚÈİ
+void slider1_callback(int32_t data)
+{
+  BLINKER_LOG("get slider state: ", data);
+  // 0åˆ°100 å¯¹åº”åˆ° 0 åˆ° 255
+  ledcWrite(ledChannel, data * 255 / 100);
+}
+
+// å¦‚æœæœªç»‘å®šçš„ç»„ä»¶è¢«è§¦å‘ï¼Œåˆ™ä¼šæ‰§è¡Œå…¶ä¸­å†…å®¹
 void dataRead(const String& data)
 {
   BLINKER_LOG("Blinker readString: ", data);
   counter++;
-  Number1.print(counter);
+  // Number1.print(counter);
 }
 
 void setup()
 {
-  // ³õÊ¼»¯´®¿Ú
+  // åˆå§‹åŒ–ä¸²å£
   Serial.begin(115200);
   BLINKER_DEBUG.stream(Serial);
   BLINKER_DEBUG.debugAll();
-  // ³õÊ¼»¯ÓĞLEDµÄIO
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, HIGH);
-  // ³õÊ¼»¯blinker
+  // åˆå§‹åŒ–æœ‰LEDçš„IO
+  // pinMode(ledPin, OUTPUT);
+  // digitalWrite(ledPin, HIGH);
+  ledcSetup(0, 5000, 8);
+  ledcAttachPin(ledPin, ledChannel);
+
+  // åˆå§‹åŒ–blinker
   Blinker.begin(auth, ssid, pswd);
-  Blinker.attachData(dataRead);
-  Button1.attach(button1_callback);
+  // Blinker.attachData(dataRead);
+  // Button1.attach(button1_callback);
+  Slider1.attach(slider1_callback);
 }
 void loop() {
   Blinker.run();

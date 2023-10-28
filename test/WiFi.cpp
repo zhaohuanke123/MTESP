@@ -1,12 +1,12 @@
-// ±¾ÊµÑéÐèÒªÁ½¿éESP32°åºÏ×÷Íê³É£¡£¡
-// £¨1£©Ò»¿éESP32Á¬½Ó³¬Éù²¨Ä£¿é£¬¶ÁÈ¡²â¾àÊý¾Ý£¬°åÉÏÁ¬½ÓIO12¿Ú½ÓLEDÐ¡µÆ¸ù¾Ý¾àÀëµÄ
-// Ô¶½üÒÔ²»Í¬µÄÖÜÆÚÉÁ¶¯¡£
-// ÉÁ¶¯ÖÜÆÚ£¨ºÁÃë£©= 990*²â¾àÊý¾Ý£¨ÀåÃ×£© *²â¾àÊý¾Ý£¨ÀåÃ×£© /(35*35)+10£¨µ±²â¾àÊý¾Ý
-// Ð¡ÓÚ35Ê±£©
-// µ±²â¾àÊý¾Ý´óÓÚ35Ê±£¬Ð¡µÆÃð£¬²»ÉÁ¶¯¡£
-// Í¬Ê±£¬Í¨¹ýWIFI UDPÍ¨Ñ¶·¢ËÍ¸øÁíÒ»¿éESP32¡£
-// £¨2£©ÁíÒ»¿éESP32½«µÃµ½µÄ²â¾àÊý¾ÝÏÔÊ¾ÔÚ´®¿Ú¼àÊÓÆ÷ÖÐ£¬Í¬Ê±¿ØÖÆ°åÔØÐ¡µÆ£¨IO02£©¸ù
-// ¾Ý½ÓÊÕµ½µÄ¾àÀëµÄÔ¶½üÒÔ²»Í¬µÄÖÜÆÚÉÁ¶¯£¬ÖÜÆÚÓëµÚÒ»¿éESP32ÉÏµÄÐ¡µÆÏàÍ¬¡£
+// æœ¬å®žéªŒéœ€è¦ä¸¤å—ESP32æ¿åˆä½œå®Œæˆï¼ï¼
+// ï¼ˆ1ï¼‰ä¸€å—ESP32è¿žæŽ¥è¶…å£°æ³¢æ¨¡å—ï¼Œè¯»å–æµ‹è·æ•°æ®ï¼Œæ¿ä¸Šè¿žæŽ¥IO12å£æŽ¥LEDå°ç¯æ ¹æ®è·ç¦»çš„
+// è¿œè¿‘ä»¥ä¸åŒçš„å‘¨æœŸé—ªåŠ¨ã€‚
+// é—ªåŠ¨å‘¨æœŸï¼ˆæ¯«ç§’ï¼‰= 990*æµ‹è·æ•°æ®ï¼ˆåŽ˜ç±³ï¼‰ *æµ‹è·æ•°æ®ï¼ˆåŽ˜ç±³ï¼‰ /(35*35)+10ï¼ˆå½“æµ‹è·æ•°æ®
+// å°äºŽ35æ—¶ï¼‰
+// å½“æµ‹è·æ•°æ®å¤§äºŽ35æ—¶ï¼Œå°ç¯ç­ï¼Œä¸é—ªåŠ¨ã€‚
+// åŒæ—¶ï¼Œé€šè¿‡WIFI UDPé€šè®¯å‘é€ç»™å¦ä¸€å—ESP32ã€‚
+// ï¼ˆ2ï¼‰å¦ä¸€å—ESP32å°†å¾—åˆ°çš„æµ‹è·æ•°æ®æ˜¾ç¤ºåœ¨ä¸²å£ç›‘è§†å™¨ä¸­ï¼ŒåŒæ—¶æŽ§åˆ¶æ¿è½½å°ç¯ï¼ˆIO02ï¼‰æ ¹
+// æ®æŽ¥æ”¶åˆ°çš„è·ç¦»çš„è¿œè¿‘ä»¥ä¸åŒçš„å‘¨æœŸé—ªåŠ¨ï¼Œå‘¨æœŸä¸Žç¬¬ä¸€å—ESP32ä¸Šçš„å°ç¯ç›¸åŒã€‚
 
 #include <Arduino.h>
 #include <Ticker.h>
@@ -31,7 +31,7 @@ void led() {
     digitalWrite(ledPin, LOW);
   }
   else
-    if (count > (990 * distance * distance / (35 * 35) + 10)) {
+    if (count > (99 * distance * distance / (35 * 35) + 1)) {
       digitalWrite(ledPin, !digitalRead(ledPin));
       count = 0;
     }
@@ -41,7 +41,7 @@ void led() {
 }
 
 
-// ·¢ËÍ¶Ë
+// å‘é€ç«¯
 #define __server__
 #ifdef __server__
 
@@ -79,17 +79,12 @@ void setup()
   pinMode(ledPin, OUTPUT);
 
   Ticker* ticker = new Ticker();
-  ticker->attach(0.001, led);
+  ticker->attach(0.01, led);
 
   Ticker* udpTicker = new Ticker();
-  udpTicker->attach(0.2, []() {
+  udpTicker->attach(0.1, []() {
     if (WiFi.status() == WL_CONNECTED)
     {
-      static int oldDistance = 0;
-      if (distance == oldDistance) {
-        return;
-      }
-      oldDistance = distance;
       udp.beginPacket(udpAddress, udp_port);
       udp.print(String(distance));
       udp.endPacket();
@@ -114,7 +109,7 @@ void loop()
 }
 #endif
 
-// ½ÓÊÕ¶Ë
+// æŽ¥æ”¶ç«¯
 #ifndef __server__
 WiFiUDP udp;
 
@@ -129,7 +124,7 @@ void setup()
 
   pinMode(ledPin, OUTPUT);
 
-  ticker.attach(0.001, led);
+  ticker.attach(0.01, led);
 }
 
 void loop()
