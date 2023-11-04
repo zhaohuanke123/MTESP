@@ -13,7 +13,8 @@
 			"*.tcc": "cpp",
 			"algorithm": "cpp",
 			"istream": "cpp",
-			"ostream": "cpp"
+			"ostream": "cpp",
+			"chrono": "cpp"
 		}
 	}
 }
