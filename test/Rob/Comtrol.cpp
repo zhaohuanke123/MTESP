@@ -1,5 +1,4 @@
 #include <WiFi.h>  //wifi功能需要的库
-#include <Ticker.h>
 #define ENCODER_L 12 //8号引脚
 #define DIRECTION_L 13 //9号引脚
 #define ENCODER_R 25 //3号引脚
@@ -20,60 +19,6 @@ int PWM_L = 600; //左轮最大量1023，需要根据自己的机器进行调整
 int PWM_R = 600; //右轮最大量1023，需要根据自己的机器进行调整 
 int PML_L_OFFSET = 0;
 int PML_R_OFFSET = 0;
-
-Ticker timer_read_encoder; // 中断函数定时器定义
-
-int32_t Velocity_L, Velocity_R; //左右轮编码器数据
-int16_t Velocity_Left, Velocity_Right; //左右轮速度
-
-void READ_ENCODER_L(void);
-void READ_ENCODER_R(void);
-void read(void);
-
-void READ_ENCODER_L(void) {
-    if (digitalRead(ENCODER_L) == LOW) {
-        //如果是下降沿触发的中断
-        if (digitalRead(DIRECTION_L) == LOW)
-            Velocity_L--;
-        //根据另外一相电平判定方向
-        else Velocity_L++;
-    }
-    else { //如果是上升沿触发的中断
-        if (digitalRead(DIRECTION_L) == LOW)
-            Velocity_L++; //根据另外一相电平判定方向
-        else Velocity_L--;
-    }
-}
-
-void READ_ENCODER_R(void) {
-    if (digitalRead(ENCODER_R) == LOW) { //如果是下降沿触发的中断
-        if (digitalRead(DIRECTION_R) == LOW)
-            Velocity_R--;//根据另外一相电平判定方向
-        else Velocity_R++;
-    }
-    else { //如果是上升沿触发的中断
-        if (digitalRead(DIRECTION_R) == LOW) Velocity_R++; //根据另外一相电平判定方向
-        else Velocity_R--;
-    }
-}
-
-void read(void) {
-    Velocity_Left = Velocity_L * 2000 / interrupt_time;
-    Velocity_L = 0; //读取左轮编码器数据，并清零，这就是通过M法测速（单位时间内的脉冲数）得到速度。
-    Velocity_Right = Velocity_R * 2000 / interrupt_time;
-    Velocity_R = 0; //读取右轮编码器数据，并清零
-}
-
-
-float l_speed = 0, r_speed = 0; // 当前小车需要达到的速度
-void taskOne(void* pvParameters)
-{
-    while (1) {
-
-
-
-    }
-}
 
 WiFiUDP Udp;//声明UDP对象
 
@@ -102,17 +47,11 @@ void setup() {
     ledcAttachPin(LSPEED, channel_L);
     ledcAttachPin(RSPEED, channel_R);
 
-    //编码器接口1 开启外部跳边沿中断
-    attachInterrupt(ENCODER_L, READ_ENCODER_L, CHANGE);
-    //中断函数READ_ENCODER_L
-    //编码器接口2 开启外部跳边沿中断
-    attachInterrupt(ENCODER_R, READ_ENCODER_R, CHANGE);
-    //中断函数READ_ENCODER_R
-    interrupts();
-    //打开外部中断
-    timer_read_encoder.attach_ms(interrupt_time, read);
-
     WiFi.softAP(wifi_SSID, wifi_Password);  //打开ESP32热点
+
+    // Serial.print("\n开发板IP地址为：");
+    // Serial.print(WiFi.softAPIP());  //串口输出模块IP地址
+
     Udp.begin(udp_port);//启动UDP监听这个端口
 }
 
@@ -132,8 +71,6 @@ void Joystick_handle(int dev, uint8_t xAxis, uint8_t yAxis)
     {
         ledcWrite(channel_L, 0);
         ledcWrite(channel_R, 0);
-        l_speed = 0;
-        r_speed = 0;
         return;
     }
     else
@@ -147,7 +84,7 @@ void Joystick_handle(int dev, uint8_t xAxis, uint8_t yAxis)
             if (m_xAxis[2] < CENTERX)
             {
                 ledcWrite(channel_L, getSpeed2(distance, m_xAxis[2]) * PWM_L / CENTERY);
-                ledcWrite(channel_R, distance * PWM_R / CENTERY);
+                ledcWrite(channel_R, PWM_R * distance / CENTERY);
             }
             else
             {
@@ -238,8 +175,7 @@ void loop() {
             else if (incomingPacket[0] == '4') {
                 PML_R_OFFSET = str2num(list[1]);
                 PWM_R = PWM_R_SET + PML_R_OFFSET;
-            }
-            else if (incomingPacket[0] == '5') {
+            } else if (incomingPacket[0] == '5') {
                 PWM_L_SET = str2num(list[1]);
                 PWM_L = PWM_L_SET + PML_L_OFFSET;
                 PWM_R_SET = str2num(list[1]);
