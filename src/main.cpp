@@ -228,7 +228,7 @@ void taskOne(void* pvParameters)
             if (r_speed > 255)
                 r_speed = 255;
         }
-        delay(80);
+        delay(50);
         // l_speed = 0; r_speed = 0;
         // for (i = 0; i < 80; i++) {
         //     digitalWrite(L_DIR, 0);
@@ -339,9 +339,10 @@ int getSpeed2(float distance, int xAxis) //差速时，计算其中一个轮的�
 void Joystick_handle(int dev, uint8_t xAxis, uint8_t yAxis)
 {
     m_xAxis[dev] = xAxis; m_yAxis[dev] = yAxis;
-    if (m_xAxis[1] == CENTERX && m_xAxis[1] == CENTERY) //归位停止,（恢复方向？） 
+    if (m_xAxis[1] == CENTERX) //归位停止,（恢复方向？） 
     {
         forward = 0;
+        turn = 0;
         return;
     }
     else
@@ -351,35 +352,37 @@ void Joystick_handle(int dev, uint8_t xAxis, uint8_t yAxis)
         if (m_yAxis[1] < CENTERY) //摇杆向上 
         {
             forward = 1;
-            TARGET_L = Max_L_Speed * distance / CENTERY;
+            TARGET_L = distance * Max_L_Speed / CENTERY;
+            TARGET_R = distance * Max_R_Speed / CENTERY;
             if (m_xAxis[2] < CENTERX)
             {
                 turn = 1;
             }
-            else if (m_xAxis[2] == CENTERX)
+            else if (m_xAxis[2] > CENTERX)
             {
-                turn = 0;
+                turn = -1;
             }
             else
             {
-                turn = -1;
+                turn = 0;
             }
         }
         else //后退 
         {
             forward = -1;
-            TARGET_R = Max_R_Speed * distance / CENTERY;
+            TARGET_L = distance * Max_L_Speed / CENTERY;
+            TARGET_R = distance * Max_R_Speed / CENTERY;
             if (m_xAxis[2] < CENTERX)
+            {
+                turn = 1;
+            }
+            else if (m_xAxis[2] > CENTERX)
             {
                 turn = -1;
             }
-            else if (m_xAxis[2] == CENTERX)
-            {
-                turn = 0;
-            }
             else
             {
-                turn = 1;
+                turn = 0;
             }
         }
     }
