@@ -208,17 +208,40 @@ void setup() {
     1);
 }
 
+#include <WiFi.h>  //wifi功能需要的库
 
+WiFiUDP Udp;//声明UDP对象
+
+const char* wifi_SSID = "ZHK_Udp";  //存储AP的名称信息
+const char* wifi_Password = "ZHK_1234";  //存储AP的密码信息
+
+uint16_t udp_port = 1122;  //存储需要监听的端口号
+
+char incomingPacket[255];  //存储Udp客户端发过来的数据
 
 void loop() {
-  Serial.print("Velocity_L:");
-  //Serial.print(Velocity_L);
-  Serial.print(l_speed);
-  Serial.print(" | Velocity_Left:");
-  Serial.print(Velocity_Left);
-  Serial.print(" ----- Velocity_R:");
-  //Serial.print(Velocity_R);
-  Serial.print(r_speed);
-  Serial.print(" | Velocity_Right:");
-  Serial.println(Velocity_Right);
+  /*接收发送过来的Udp数据*/
+    int Data_length = Udp.parsePacket();  //获取接收的数据的长度
+    if (Data_length)  //如果有数据那么Data_length不为0，无数据Data_length为0
+    {
+        int len = Udp.read(incomingPacket, 255);  //读取数据，将数据保存在数组incomingPacket中
+        if (len > 0)  //为了避免获取的数据后面乱码做的判断
+        {
+            incomingPacket[len] = 0;
+        }
+
+        //Serial.println(incomingPacket); //调试获得的值
+        if (incomingPacket[0] == '1' || incomingPacket[0] == '2')
+        {//处理摇杆数据
+        }
+        else
+        {
+            //Split(incomingPacket);
+            if (incomingPacket[0] == '3') {
+            }
+            else if (incomingPacket[0] == '4') {
+            } else if (incomingPacket[0] == '5') {
+            }
+        }
+    }
 }

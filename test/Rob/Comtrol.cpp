@@ -1,4 +1,5 @@
 #include <WiFi.h>  //wifi功能需要的库
+#include <Ticker.h>
 #define ENCODER_L 12 //8号引脚
 #define DIRECTION_L 13 //9号引脚
 #define ENCODER_R 25 //3号引脚
@@ -22,8 +23,8 @@ int PML_R_OFFSET = 0;
 
 WiFiUDP Udp;//声明UDP对象
 
-const char* wifi_SSID = "ZHK_Udp";  //存储AP的名称信息
-const char* wifi_Password = "ZHK_1234";  //存储AP的密码信息
+const char* wifi_SSID = "123456";  //存储AP的名称信息
+const char* wifi_Password = "12345678";  //存储AP的密码信息
 
 uint16_t udp_port = 1122;  //存储需要监听的端口号
 
@@ -48,10 +49,6 @@ void setup() {
     ledcAttachPin(RSPEED, channel_R);
 
     WiFi.softAP(wifi_SSID, wifi_Password);  //打开ESP32热点
-
-    // Serial.print("\n开发板IP地址为：");
-    // Serial.print(WiFi.softAPIP());  //串口输出模块IP地址
-
     Udp.begin(udp_port);//启动UDP监听这个端口
 }
 
@@ -84,10 +81,11 @@ void Joystick_handle(int dev, uint8_t xAxis, uint8_t yAxis)
             if (m_xAxis[2] < CENTERX)
             {
                 ledcWrite(channel_L, getSpeed2(distance, m_xAxis[2]) * PWM_L / CENTERY);
-                ledcWrite(channel_R, PWM_R * distance / CENTERY);
+                ledcWrite(channel_R, distance * PWM_R / CENTERY);
             }
             else
             {
+
                 ledcWrite(channel_L, PWM_L * distance / CENTERY);
                 ledcWrite(channel_R, getSpeed2(distance, m_xAxis[2]) * PWM_R / CENTERY);
             }
@@ -103,6 +101,7 @@ void Joystick_handle(int dev, uint8_t xAxis, uint8_t yAxis)
             }
             else
             {
+
                 ledcWrite(channel_L, PWM_L * distance / CENTERY);
                 ledcWrite(channel_R, getSpeed2(distance, m_xAxis[2]) * PWM_R / CENTERY);
             }
@@ -175,7 +174,8 @@ void loop() {
             else if (incomingPacket[0] == '4') {
                 PML_R_OFFSET = str2num(list[1]);
                 PWM_R = PWM_R_SET + PML_R_OFFSET;
-            } else if (incomingPacket[0] == '5') {
+            }
+            else if (incomingPacket[0] == '5') {
                 PWM_L_SET = str2num(list[1]);
                 PWM_L = PWM_L_SET + PML_L_OFFSET;
                 PWM_R_SET = str2num(list[1]);
